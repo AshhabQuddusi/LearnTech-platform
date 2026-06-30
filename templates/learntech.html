@@ -1,0 +1,287 @@
+{% extends "base.html" %}
+{% block title %}Learn Tech — LearnTech{% endblock %}
+{% block head %}
+<style>
+.lt-hero{padding:3.5rem clamp(1rem,5vw,4rem) 0;max-width:1280px;margin:0 auto}
+
+/* Tab nav */
+.lt-tabs{
+  display:flex;gap:4px;padding:0 clamp(1rem,5vw,4rem);
+  background:var(--dark);border-bottom:3px solid var(--dark);
+  position:sticky;top:var(--nav-h);z-index:90;
+}
+.lt-tab{
+  padding:.85rem 1.2rem;font-family:var(--font-pixel);font-size:.45rem;
+  letter-spacing:.06em;color:rgba(255,255,255,.4);
+  background:none;border:none;border-bottom:3px solid transparent;
+  cursor:pointer;display:flex;align-items:center;gap:.4rem;
+  margin-bottom:-3px;transition:color var(--t-fast),border-color var(--t-fast);
+}
+.lt-tab:hover{color:rgba(255,255,255,.75)}
+.lt-tab.active{color:var(--gold);border-bottom-color:var(--orange)}
+
+.lt-section{max-width:1280px;margin:0 auto;padding:3rem clamp(1rem,5vw,4rem) 5rem;display:none}
+.lt-section.active{display:block}
+
+/* ── VIDEO ──────────────────────────────────────────────────────────────────── */
+.video-card{overflow:hidden;cursor:pointer}
+.video-thumb{
+  position:relative;aspect-ratio:16/9;border:2px solid var(--dark);
+  border-radius:var(--r-md);overflow:hidden;margin-bottom:1rem;
+}
+.video-cover{
+  position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+  transition:transform .35s var(--ease);
+}
+.video-card:hover .video-cover{transform:scale(1.03)}
+.play-btn{
+  width:60px;height:60px;border-radius:50%;
+  background:var(--orange);border:3px solid var(--orange-dk);
+  display:flex;align-items:center;justify-content:center;
+  font-size:1.3rem;color:#fff;
+  box-shadow:4px 4px 0 var(--orange-dk);
+  transition:transform var(--t-fast),box-shadow var(--t-fast);
+}
+.video-card:hover .play-btn{transform:scale(1.1);box-shadow:5px 5px 0 var(--orange-dk)}
+.video-card:active .play-btn{transform:translate(4px,4px);box-shadow:none}
+.v-dur{
+  position:absolute;bottom:.55rem;right:.6rem;
+  font-family:var(--font-pixel);font-size:.38rem;
+  background:rgba(26,26,46,.8);color:#fff;
+  padding:.12rem .42rem;border-radius:2px;letter-spacing:.04em;
+}
+.v-src{
+  position:absolute;top:.55rem;left:.6rem;
+  font-family:var(--font-pixel);font-size:.38rem;
+  background:rgba(26,26,46,.75);color:var(--gold);
+  padding:.12rem .42rem;border-radius:2px;letter-spacing:.04em;
+}
+.v-xp{
+  position:absolute;top:.55rem;right:.6rem;
+  font-family:var(--font-pixel);font-size:.38rem;
+  background:var(--green);color:#fff;
+  padding:.12rem .42rem;border-radius:2px;border:1px solid var(--green-dk);
+}
+
+/* ── PODCAST ──────────────────────────────────────────────────────────────── */
+.pod-hero{
+  background:var(--dark);border:2px solid var(--dark);border-radius:var(--r-xl);
+  padding:2.5rem;display:grid;grid-template-columns:160px 1fr;gap:2rem;
+  align-items:center;margin-bottom:2.5rem;
+  box-shadow:5px 5px 0 var(--orange-dk);
+}
+@media(max-width:640px){.pod-hero{grid-template-columns:1fr}}
+.pod-art{
+  width:160px;height:160px;border-radius:var(--r-lg);
+  background:var(--orange);border:3px solid var(--orange-dk);
+  display:flex;align-items:center;justify-content:center;
+  font-size:3.5rem;flex-shrink:0;
+  box-shadow:4px 4px 0 var(--orange-dk);
+}
+.pod-player{
+  background:rgba(255,255,255,.06);border:2px solid rgba(255,255,255,.15);
+  border-radius:var(--r-md);padding:1rem 1.25rem;margin-top:1.25rem;
+}
+.pod-row{display:flex;align-items:center;gap:.75rem}
+.pod-play-btn{
+  width:36px;height:36px;border-radius:50%;flex-shrink:0;
+  background:var(--orange);border:2px solid var(--orange-dk);
+  color:#fff;font-size:.9rem;
+  display:flex;align-items:center;justify-content:center;
+  box-shadow:2px 2px 0 var(--orange-dk);
+  transition:transform var(--t-fast),box-shadow var(--t-fast);
+}
+.pod-play-btn:hover{transform:translate(-1px,-1px);box-shadow:3px 3px 0 var(--orange-dk)}
+.pod-play-btn:active{transform:translate(2px,2px);box-shadow:none}
+.pod-bar{flex:1;height:6px;background:rgba(255,255,255,.15);border-radius:2px;cursor:pointer;appearance:none;-webkit-appearance:none;accent-color:var(--orange)}
+.pod-time{font-family:var(--font-pixel);font-size:.38rem;color:rgba(255,255,255,.45);margin-top:.3rem;letter-spacing:.05em}
+
+.ep-row{
+  display:flex;align-items:center;gap:.9rem;
+  padding:.9rem 1.1rem;border-radius:var(--r-md);
+  border:2px solid var(--border-lt);background:var(--ivory);
+  transition:border-color var(--t-fast),background var(--t-fast),box-shadow var(--t-fast);
+  cursor:pointer;margin-bottom:.4rem;
+}
+.ep-row:hover{border-color:var(--orange);background:#fff;box-shadow:3px 3px 0 var(--orange-dk)}
+.ep-num{font-family:var(--font-pixel);font-size:.42rem;color:var(--muted);width:30px;flex-shrink:0}
+.ep-dur{font-family:var(--font-pixel);font-size:.38rem;color:var(--muted);flex-shrink:0;letter-spacing:.04em}
+
+/* ── BLOG ───────────────────────────────────────────────────────────────────── */
+.blog-card{overflow:hidden;transition:transform var(--t-base),box-shadow var(--t-base)}
+.blog-card:hover{transform:translate(-2px,-2px)}
+.blog-thumb{
+  aspect-ratio:16/7;border:2px solid var(--dark);border-radius:var(--r-md);
+  overflow:hidden;margin-bottom:1rem;
+  display:flex;align-items:center;justify-content:center;font-size:2.5rem;
+}
+.blog-meta{display:flex;align-items:center;gap:.55rem;margin-bottom:.55rem;flex-wrap:wrap}
+.blog-read{font-family:var(--font-pixel);font-size:.38rem;color:var(--orange);letter-spacing:.04em}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="lt-hero">
+  <p class="eyebrow reveal">BONUS STAGE</p>
+  <h1 class="reveal">LEARN TECH —<br><span class="txt-blue">DAILY QUESTS</span></h1>
+  <p class="reveal" style="max-width:440px;margin-top:.75rem">Videos, podcasts, and blog posts — unlocked every single day. Stay sharp. Earn XP.</p>
+</div>
+
+<nav class="lt-tabs" role="tablist">
+  <button class="lt-tab active" data-tab="video"   role="tab" id="tab-video">   🎬 VIDEO</button>
+  <button class="lt-tab"        data-tab="podcast" role="tab" id="tab-podcast"> 🎙️ PODCAST</button>
+  <button class="lt-tab"        data-tab="blog"    role="tab" id="tab-blog">    📝 BLOG</button>
+</nav>
+
+<!-- ── VIDEO ──────────────────────────────────────────────────────────────── -->
+<section class="lt-section active" id="section-video" aria-labelledby="tab-video">
+  <div class="section-header">
+    <div><p class="eyebrow">WATCH &amp; EARN</p><h2>DAILY VIDEO <span class="txt-orange">QUESTS</span></h2></div>
+  </div>
+  <div class="grid-3 stagger">
+    {% set videos=[
+      ("PkZNo7MFNFg","JavaScript Full Course","3:26:42","WEB DEV","#4D73D9,#7B9AE8","⚡","freeCodeCamp","Complete beginner JS course — variables to async/await. Earn 500 XP.",500),
+      ("rfscVS0vtbw","Python in 100 Seconds","1:40","PYTHON","#76B947,#9ED46A","🐍","Fireship","The fastest Python overview ever made. Perfect for cross-language devs.",50),
+      ("ysEN5RaKOlA","CSS Grid in 20 Minutes","20:10","CSS","#E66AA8,#F09AC8","🎨","Traversy","Everything you need to use CSS Grid confidently — practical and concise.",150),
+      ("W6NZfCO5SIk","Async/Await Explained","14:22","JAVASCRIPT","#F5C518,#FFDC60","⏱","Web Dev Simplified","Finally understand Promises and async/await in JavaScript.",120),
+      ("ok-plXXHlWw","Linux Command Line","5:00:00","LINUX","#76B947,#9ED46A","🐧","freeCodeCamp","Complete Linux terminal course — basics to scripting.",400),
+      ("8JJ101D3knE","Python Backend Dev","6:19:38","PYTHON","#4D73D9,#7B9AE8","🐍","freeCodeCamp","Build real Python backends with Flask and FastAPI.",450),
+    ] %}
+    {% for v in videos %}
+    <article class="card video-card card-blue"
+      onclick="LT_openVideo('{{ v[0] }}','{{ v[1] }}')"
+      role="button" tabindex="0"
+      aria-label="Play: {{ v[1] }}"
+      onkeydown="if(event.key==='Enter')LT_openVideo('{{ v[0] }}','{{ v[1] }}')">
+      <div class="video-thumb">
+        <div class="video-cover" style="background:linear-gradient(145deg,{{ v[4] }})">
+          <span style="position:absolute;font-size:3rem;opacity:.2">{{ v[5] }}</span>
+          <div class="play-btn" aria-hidden="true">▶</div>
+        </div>
+        <span class="v-dur">{{ v[2] }}</span>
+        <span class="v-src">{{ v[7] }}</span>
+        <span class="v-xp">+{{ v[8] }}XP</span>
+      </div>
+      <div class="flex-between" style="margin-bottom:.5rem">
+        <span class="badge badge-blue">{{ v[3] }}</span>
+        <span style="font-family:var(--font-pixel);font-size:.38rem;color:var(--muted)">{{ v[7] }}</span>
+      </div>
+      <h3>{{ v[1] }}</h3>
+      <p class="text-sm mt-sm">{{ v[6] }}</p>
+    </article>
+    {% endfor %}
+  </div>
+  <div style="text-align:center;margin-top:3rem">
+    <a href="https://youtube.com/@freecodecamp" class="btn btn-ghost" target="_blank" rel="noopener">▶ MORE ON YOUTUBE</a>
+  </div>
+</section>
+
+<!-- ── PODCAST ────────────────────────────────────────────────────────────── -->
+<section class="lt-section" id="section-podcast" aria-labelledby="tab-podcast">
+  <p class="eyebrow" style="margin-bottom:1.5rem">AUDIO QUESTS</p>
+  <div class="pod-hero reveal">
+    <div class="pod-art">🎧</div>
+    <div>
+      <span class="badge badge-orange" style="margin-bottom:.75rem">LATEST EPISODE</span>
+      <h2 style="color:#fff;font-size:1.1rem;line-height:1.45">EP.42 — THE FUTURE OF WEB DEV WITH AN AI CO-PILOT</h2>
+      <p style="color:rgba(255,255,255,.6);font-size:.88rem;margin-top:.6rem">Three working devs on how AI changed their workflow, what's real vs hype, and where the industry is heading.</p>
+      <div class="pod-player">
+        <div class="pod-row">
+          <button class="pod-play-btn" id="pod-play" aria-label="Play episode" onclick="togglePod(this)">▶</button>
+          <div style="flex:1">
+            <input type="range" class="pod-bar" id="pod-bar" value="0" min="0" max="100" aria-label="Episode progress">
+            <div class="pod-time"><span id="pod-time">0:00</span> / 48:32</div>
+          </div>
+          <span style="font-family:var(--font-pixel);font-size:.38rem;background:var(--green);color:#fff;padding:.1rem .38rem;border-radius:2px;border:1px solid var(--green-dk)">+80XP</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <h3 style="margin-bottom:1rem;font-size:1rem">ALL EPISODES</h3>
+  <div class="stagger">
+    {% for ep in [
+      ("42","The Future of Web Dev with an AI Co-pilot","3 working devs","48:32",80),
+      ("41","Building in Public — The Honest Reality","Indie hacker panel","55:10",90),
+      ("40","From Bootcamp to Senior Dev in 3 Years","Alicia M.","41:20",70),
+      ("39","Open Source Isn't Dying — It's Evolving","OSS maintainers","52:05",85),
+      ("38","The Database Nobody Talks About: SQLite","Richard Hipp","38:44",65),
+      ("37","CSS Is a Programming Language. Fight Me.","Lea Verou","44:18",75),
+    ] %}
+    <div class="ep-row">
+      <span class="ep-num">{{ ep[0] }}</span>
+      <div style="flex:1">
+        <div style="font-size:.9rem;font-weight:700;color:var(--dark)">{{ ep[1] }}</div>
+        <div style="font-size:.75rem;color:var(--muted);margin-top:2px">{{ ep[2] }}</div>
+      </div>
+      <span class="ep-dur">{{ ep[3] }}</span>
+      <span style="font-family:var(--font-pixel);font-size:.36rem;background:var(--green);color:#fff;padding:.08rem .35rem;border-radius:2px;white-space:nowrap">+{{ ep[4] }}XP</span>
+      <button class="btn btn-sm btn-ghost" aria-label="Play episode {{ ep[0] }}">▶</button>
+    </div>
+    {% endfor %}
+  </div>
+</section>
+
+<!-- ── BLOG ──────────────────────────────────────────────────────────────── -->
+<section class="lt-section" id="section-blog" aria-labelledby="tab-blog">
+  <div class="section-header">
+    <div><p class="eyebrow">READING QUESTS</p><h2>TECH TIPS <span class="txt-blue">BLOG</span></h2></div>
+  </div>
+  <div class="grid-3 stagger">
+    {% for post in [
+      ("#4D73D9,#7B9AE8","⚡","CAREER","Jun 2026","5 MIN","20XP","10 Things Nobody Tells You When You Start Coding","The gap between tutorials and real projects is wider than you think. Here's what actually matters."),
+      ("#76B947,#9ED46A","🐍","PYTHON","Jun 2026","8 MIN","25XP","Why Every Developer Should Know at Least Basic Python","It's not about being a Python dev — it's about what Python unlocks: automation, data, AI, scripting."),
+      ("#E97B3C,#F0A070","🛠","TOOLS","May 2026","6 MIN","20XP","The 12 VS Code Extensions Worth Actually Installing","Stop installing random extensions. These 12 are what senior devs actually keep enabled."),
+      ("#E66AA8,#F09AC8","📐","CSS","May 2026","4 MIN","15XP","CSS Grid vs Flexbox — When to Use Which","Not a war. They solve different problems. Here's the mental model that makes it click."),
+      ("#F5C518,#FFDC60","🧠","LEARNING","May 2026","7 MIN","25XP","How to Study Programming and Actually Retain It","Active recall, spaced repetition, and building things — the science behind learning tech skills."),
+      ("#4D73D9,#7B9AE8","🔒","SECURITY","Apr 2026","9 MIN","30XP","Web Security Basics Every Developer Must Know","XSS, SQL injection, CORS, HTTPS — the attacks you need to understand before you ship anything."),
+    ] %}
+    <article class="card blog-card reveal">
+      <div class="blog-thumb" style="background:linear-gradient(145deg,{{post[0]}})">{{ post[1] }}</div>
+      <div class="blog-meta">
+        <span class="badge badge-blue">{{ post[2] }}</span>
+        <span style="font-size:.75rem;color:var(--muted)">{{ post[3] }}</span>
+        <span class="blog-read">{{ post[4] }} READ</span>
+        <span style="font-family:var(--font-pixel);font-size:.36rem;background:var(--green);color:#fff;padding:.08rem .35rem;border-radius:2px;border:1px solid var(--green-dk)">+{{ post[5] }}</span>
+      </div>
+      <h3>{{ post[6] }}</h3>
+      <p class="text-sm mt-sm">{{ post[7] }}</p>
+      <a href="#" class="btn btn-ghost btn-sm mt-md">READ ARTICLE →</a>
+    </article>
+    {% endfor %}
+  </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  document.querySelectorAll('.lt-tab').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      const tab=btn.dataset.tab;
+      document.querySelectorAll('.lt-tab').forEach(b=>{b.classList.remove('active');b.setAttribute('aria-selected','false');});
+      document.querySelectorAll('.lt-section').forEach(s=>s.classList.remove('active'));
+      btn.classList.add('active');btn.setAttribute('aria-selected','true');
+      document.getElementById(`section-${tab}`)?.classList.add('active');
+      window.LT_reveal?.();
+    });
+  });
+  const h=location.hash.replace('#','');
+  if(['video','podcast','blog'].includes(h))document.querySelector(`[data-tab="${h}"]`)?.click();
+
+  let playing=false,progress=0,iv;
+  function togglePod(btn){
+    playing=!playing;
+    btn.textContent=playing?'⏸':'▶';
+    btn.setAttribute('aria-label',playing?'Pause episode':'Play episode');
+    if(playing){
+      iv=setInterval(()=>{
+        progress=Math.min(progress+100/2912,100);
+        document.getElementById('pod-bar').value=progress;
+        const s=Math.round(progress/100*2912),m=Math.floor(s/60);
+        document.getElementById('pod-time').textContent=`${m}:${String(s%60).padStart(2,'0')}`;
+        if(progress>=100)clearInterval(iv);
+      },1000);
+    }else clearInterval(iv);
+  }
+</script>
+{% endblock %}

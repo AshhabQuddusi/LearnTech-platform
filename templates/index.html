@@ -1,0 +1,387 @@
+{% extends "base.html" %}
+{% block title %}LearnTech — Learn Technology, The Right Way{% endblock %}
+{% block head %}
+<style>
+/* ── HERO ──────────────────────────────────────────────────────────────────── */
+.hero {
+  min-height: 92vh; display:flex; align-items:center; justify-content:center;
+  text-align:center; position:relative; overflow:hidden;
+  padding: 6rem 1.5rem 4rem;
+  background: var(--cream);
+}
+
+/* Pixel grid background */
+.hero::before {
+  content:''; position:absolute; inset:0; pointer-events:none;
+  background-image:
+    linear-gradient(rgba(77,115,217,.06) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(77,115,217,.06) 1px, transparent 1px);
+  background-size: 48px 48px;
+}
+
+/* Floating clouds */
+.cloud-wrap { position:absolute; inset:0; pointer-events:none; overflow:hidden; z-index:0; }
+.cloud {
+  position:absolute;
+  background:white; border:2px solid var(--border-lt);
+  border-radius:var(--r-xl);
+  animation: float-up 4s ease-in-out infinite;
+}
+.cloud::before, .cloud::after { content:''; position:absolute; background:white; border:2px solid var(--border-lt); border-radius:50%; }
+.cloud-1 { width:80px; height:28px; top:18%; left:5%;  animation-delay:0s; }
+.cloud-1::before{width:32px;height:32px;top:-18px;left:12px;}
+.cloud-1::after{width:22px;height:22px;top:-10px;left:36px;}
+.cloud-2 { width:60px; height:22px; top:30%; right:8%; animation-delay:-1.5s; }
+.cloud-2::before{width:24px;height:24px;top:-14px;left:8px;}
+.cloud-2::after{width:18px;height:18px;top:-8px;left:26px;}
+.cloud-3 { width:70px; height:24px; top:60%; left:12%; animation-delay:-2.5s; }
+.cloud-3::before{width:28px;height:28px;top:-16px;left:10px;}
+.cloud-3::after{width:20px;height:20px;top:-10px;left:30px;}
+.cloud-4 { width:55px; height:20px; top:75%; right:15%; animation-delay:-0.8s; }
+.cloud-4::before{width:22px;height:22px;top:-12px;left:6px;}
+.cloud-4::after{width:16px;height:16px;top:-7px;left:22px;}
+
+/* Floating coins */
+.coin-wrap { position:absolute; inset:0; pointer-events:none; z-index:0; }
+.hero-coin {
+  position:absolute; width:22px; height:22px;
+  background:var(--gold); border:2px solid var(--gold-dk);
+  border-radius:50%; box-shadow:2px 2px 0 var(--gold-dk);
+  display:flex; align-items:center; justify-content:center;
+  font-family:var(--font-pixel); font-size:.35rem; color:var(--gold-dk);
+  animation: coin-float linear infinite;
+}
+@keyframes coin-float {
+  0% { transform:translateY(100vh) rotate(0deg); opacity:0; }
+  5% { opacity:1; }
+  90%{ opacity:.7; }
+  100%{ transform:translateY(-60px) rotate(360deg); opacity:0; }
+}
+
+/* Hero content */
+.hero-content { position:relative; z-index:1; max-width:800px; }
+
+/* INSERT COIN banner */
+.insert-coin {
+  display:inline-flex; align-items:center; gap:.6rem;
+  font-family:var(--font-pixel); font-size:.55rem; letter-spacing:.1em;
+  color:var(--orange); background:var(--ivory);
+  border:2px solid var(--orange); border-radius:var(--r-sm);
+  padding:.35rem .9rem; margin-bottom:1.5rem;
+  box-shadow:3px 3px 0 var(--orange-dk);
+  animation: blink-border 1.5s step-end infinite;
+}
+@keyframes blink-border { 0%,100%{border-color:var(--orange)} 50%{border-color:transparent} }
+
+.hero h1 { line-height:1.5; letter-spacing:.02em; }
+.hero-tagline {
+  font-family:var(--font-pixel);
+  font-size:clamp(.55rem,1.8vw,.9rem);
+  color:var(--blue); margin-top:.5rem; letter-spacing:.03em;
+  animation:fade-up .8s .3s both var(--ease);
+}
+@keyframes fade-up{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+
+.hero-sub { font-size:1rem; max-width:500px; margin:1.2rem auto 0; animation:fade-up .8s .45s both var(--ease); }
+
+.hero-actions {
+  display:flex; align-items:center; justify-content:center;
+  flex-wrap:wrap; gap:.75rem; margin-top:2.2rem;
+  animation:fade-up .8s .58s both var(--ease);
+}
+
+/* Platform "ground" row beneath hero buttons */
+.hero-platforms {
+  display:flex; align-items:center; justify-content:center; gap:4px;
+  margin-top:2.5rem; flex-wrap:wrap;
+  animation:fade-up .8s .7s both var(--ease);
+}
+.platform-block {
+  width:36px; height:18px;
+  background:var(--orange); border:2px solid var(--orange-dk);
+  border-radius:4px; box-shadow:0 3px 0 var(--orange-dk);
+}
+
+/* ── STATS ─────────────────────────────────────────────────────────────────── */
+.stats-band {
+  background:var(--dark); border-top:3px solid var(--dark); border-bottom:3px solid var(--dark);
+}
+.stats-inner {
+  max-width:1000px; margin:0 auto;
+  padding:2.5rem clamp(1rem,5vw,4rem);
+  display:grid; grid-template-columns:repeat(4,1fr); gap:1.5rem; text-align:center;
+}
+@media(max-width:580px){.stats-inner{grid-template-columns:repeat(2,1fr)}}
+.stat-n { font-family:var(--font-pixel); font-size:clamp(1.3rem,4vw,2.2rem); color:var(--gold); line-height:1; }
+.stat-l { font-family:var(--font-pixel); font-size:.42rem; letter-spacing:.1em; color:rgba(255,255,255,.5); margin-top:.5rem; }
+
+/* ── MARQUEE ───────────────────────────────────────────────────────────────── */
+.marquee-wrap{overflow:hidden;padding:1rem 0;border-top:2px solid var(--border-lt);border-bottom:2px solid var(--border-lt);background:var(--ivory)}
+.marquee-track{display:flex;gap:2rem;width:max-content;animation:marquee 28s linear infinite}
+.marquee-wrap:hover .marquee-track{animation-play-state:paused}
+@keyframes marquee{to{transform:translateX(-50%)}}
+.m-item{display:flex;align-items:center;gap:.45rem;font-family:var(--font-pixel);font-size:.45rem;color:var(--muted);white-space:nowrap;letter-spacing:.04em}
+.m-dot{width:8px;height:8px;background:var(--orange);border:2px solid var(--orange-dk);border-radius:1px;flex-shrink:0}
+
+/* ── ACHIEVEMENT STRIP ─────────────────────────────────────────────────────── */
+.achievements {
+  display:flex; gap:1rem; overflow-x:auto; padding-bottom:.5rem;
+  scrollbar-width:none;
+}
+.achievements::-webkit-scrollbar{display:none}
+
+/* ── COURSE CARD ───────────────────────────────────────────────────────────── */
+.course-thumb{height:110px;border:2px solid var(--dark);border-radius:10px;position:relative;overflow:hidden;margin-bottom:1rem;display:flex;align-items:flex-end;padding:.65rem}
+
+/* ── LT CARDS ──────────────────────────────────────────────────────────────── */
+.lt-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.2rem}
+@media(max-width:768px){.lt-grid{grid-template-columns:1fr}}
+.lt-c{padding:2rem 1.75rem;border-radius:var(--r-xl);border:2px solid var(--dark);background:var(--ivory);text-align:center;box-shadow:var(--px-shadow-lg);transition:transform var(--t-base),box-shadow var(--t-base)}
+.lt-c:hover{transform:translate(-2px,-2px);box-shadow:7px 7px 0 var(--dark)}
+.lt-icon{width:52px;height:52px;border-radius:var(--r-md);border:2px solid var(--dark);display:flex;align-items:center;justify-content:center;font-size:1.4rem;margin:0 auto 1.25rem;box-shadow:var(--px-shadow-sm)}
+
+/* ── PREMIUM BAND ──────────────────────────────────────────────────────────── */
+.prem-band {
+  border-radius:var(--r-xl); padding:4rem clamp(1.5rem,5vw,4rem);
+  text-align:center; position:relative; overflow:hidden;
+  background:var(--dark); border:3px solid var(--dark);
+  box-shadow:6px 6px 0 var(--orange-dk);
+}
+.prem-band h2,.prem-band p{color:rgba(255,255,255,.9)}
+
+/* ── STACK TEASE ───────────────────────────────────────────────────────────── */
+.stack-tease{background:var(--ivory);border:2px solid var(--dark);border-radius:var(--r-xl);padding:3rem;text-align:center;box-shadow:var(--px-shadow-lg)}
+</style>
+{% endblock %}
+
+{% block content %}
+
+<!-- ══ HERO ═══════════════════════════════════════════════════════════════════ -->
+<section class="hero" aria-label="Hero">
+  <!-- Clouds -->
+  <div class="cloud-wrap" aria-hidden="true">
+    <div class="cloud cloud-1"></div>
+    <div class="cloud cloud-2"></div>
+    <div class="cloud cloud-3"></div>
+    <div class="cloud cloud-4"></div>
+  </div>
+  <!-- Floating coins -->
+  <div class="coin-wrap" aria-hidden="true">
+    {% for i in range(6) %}
+    <div class="hero-coin" style="left:{{[8,18,32,52,68,82][i]}}%;animation-duration:{{[7,11,9,13,8,10][i]}}s;animation-delay:{{[0,-3,-6,-2,-8,-4][i]}}s">$</div>
+    {% endfor %}
+  </div>
+
+  <div class="hero-content">
+    <div class="insert-coin">
+      <span class="pulse-dot"></span>
+      INSERT COIN TO START LEARNING
+    </div>
+
+    <h1>The place where<br>developers become<br><span class="txt-orange">unstoppable.</span></h1>
+
+    <div class="hero-tagline">▶ PRESS START · LEVEL UP · EARN XP · MASTER TECH</div>
+
+    <p class="hero-sub">Real courses from Harvard, MIT, freeCodeCamp and more. Free to play. Premium to dominate.</p>
+
+    <div class="hero-actions">
+      <a href="/courses" class="btn btn-orange btn-xl">▶ PRESS START</a>
+      <a href="/stack"   class="btn btn-blue   btn-xl">EXPLORE THE STACK</a>
+    </div>
+
+    <!-- XP bar in hero -->
+    <div style="max-width:420px;margin:2rem auto 0">
+      <div class="xp-label">
+        <span>LEARNING PROGRESS</span>
+        <span class="txt-green">+250 XP TO NEXT LEVEL</span>
+      </div>
+      <div class="xp-wrap">
+        <div class="xp-bar" data-xp="65" style="width:65%"></div>
+      </div>
+    </div>
+
+    <!-- Platform blocks -->
+    <div class="hero-platforms" aria-hidden="true">
+      {% for _ in range(18) %}
+      <div class="platform-block" style="opacity:{{ 0.3 + loop.index0 * 0.04 }}"></div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+
+<!-- ══ ACHIEVEMENT UNLOCK STRIP ════════════════════════════════════════════ -->
+<div style="background:var(--ivory);border-top:2px solid var(--dark);border-bottom:2px solid var(--dark);padding:1.5rem clamp(1rem,5vw,4rem)">
+  <div style="max-width:1280px;margin:0 auto">
+    <div class="eyebrow" style="margin-bottom:1rem">ACHIEVEMENTS UNLOCKED</div>
+    <div class="achievements stagger">
+      {% for a in [
+        ('🏆','FIRST STEP','Visited LearnTech'),
+        ('📚','BOOKWORM','Explored The Stack'),
+        ('⚡','SPEED RUN','Completed 1 course'),
+        ('🌐','WEB WARRIOR','Learned HTML+CSS'),
+        ('🐍','SNAKE CHARMER','Mastered Python'),
+        ('🎯','SHARP SHOOTER','100% Quiz Score'),
+        ('💎','PREMIUM PLAYER','Upgraded to Plus'),
+      ] %}
+      <div class="achievement float float-delay-{{loop.index0 % 3}}">
+        <div class="achievement-icon">{{ a[0] }}</div>
+        <div class="achievement-name">{{ a[1] }}</div>
+        <div class="achievement-name" style="color:var(--muted);margin-top:2px">{{ a[2] }}</div>
+        {% if loop.index <= 2 %}<div class="achievement-new">NEW!</div>{% endif %}
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+
+
+<!-- ══ STATS ════════════════════════════════════════════════════════════════ -->
+<div class="stats-band reveal">
+  <div class="stats-inner">
+    <div><div class="stat-n" data-count="82000" data-suffix="+">82,000+</div><div class="stat-l">PLAYERS ACTIVE</div></div>
+    <div><div class="stat-n" id="s-courses" data-count="17">17</div><div class="stat-l">FREE LEVELS</div></div>
+    <div><div class="stat-n" id="s-articles" data-count="12">12</div><div class="stat-l">STACK ITEMS</div></div>
+    <div><div class="stat-n" data-count="100" data-suffix="%">100%</div><div class="stat-l">OPEN SOURCE</div></div>
+  </div>
+</div>
+
+
+<!-- ══ MARQUEE ══════════════════════════════════════════════════════════════ -->
+<div class="marquee-wrap" aria-hidden="true">
+  <div class="marquee-track">
+    {% set srcs = ["⭐ freeCodeCamp","🎓 MIT OpenCourseWare","🏛 Harvard CS50","⚔️ The Odin Project","🤖 fast.ai","📖 MDN Web Docs","🔬 arXiv","🐍 Python.org","🤙 Automate Boring Stuff","🐧 Linux Foundation"] * 2 %}
+    {% for s in srcs %}<span class="m-item"><span class="m-dot"></span>{{ s }}</span>{% endfor %}
+  </div>
+</div>
+
+
+<!-- ══ FEATURED COURSES ══════════════════════════════════════════════════════ -->
+<div class="section">
+  <div class="section-header">
+    <div>
+      <p class="eyebrow">FEATURED LEVELS</p>
+      <h2>SELECT YOUR <span class="txt-orange">COURSE</span></h2>
+    </div>
+    <a href="/courses" class="btn btn-ghost btn-sm">VIEW ALL LEVELS →</a>
+  </div>
+
+  <div class="grid-3 stagger">
+    {% set cat_meta = {'web':('#4D73D9','#7B9AE8','🌐'),'python':('#76B947','#9ED46A','🐍'),'data':('#E66AA8','#F09AC8','📊'),'backend':('#E97B3C','#F0A070','⚙️'),'tools':('#8B8080','#B0A8A8','🛠')} %}
+    {% for c in courses %}
+    {% set m = cat_meta.get(c.category, ('#F5C518','#FFDC60','📚')) %}
+    {% set xp = [100,150,200,250,300][loop.index0 % 5] %}
+    <article class="card card-blue">
+      <div class="course-thumb" style="background:linear-gradient(145deg,{{m[0]}},{{m[1]}})">
+        <span style="position:absolute;top:.5rem;left:.5rem;font-family:var(--font-pixel);font-size:.38rem;background:rgba(26,26,46,.7);color:#fff;padding:.12rem .38rem;border-radius:2px">{{ c.source }}</span>
+        <span class="badge level-{{ c.level }}">{{ c.level }}</span>
+        <span style="position:absolute;right:.75rem;top:50%;transform:translateY(-50%);font-size:2.1rem;opacity:.28">{{ m[2] }}</span>
+        <span style="position:absolute;top:.5rem;right:.5rem;font-family:var(--font-pixel);font-size:.38rem;background:var(--gold);color:var(--dark);padding:.1rem .38rem;border-radius:2px;border:1px solid var(--gold-dk)">+{{ xp }}XP</span>
+      </div>
+      <div class="flex-between mt-sm">
+        <span class="badge badge-blue">{{ c.category }}</span>
+        {% if c.is_premium %}<span class="badge badge-gold">★ PREMIUM</span>{% endif %}
+      </div>
+      <h3 class="mt-sm" style="font-size:.95rem;line-height:1.35">{{ c.title }}</h3>
+      <p class="text-sm mt-sm" style="display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden">{{ c.description }}</p>
+      <div class="flex-between mt-md">
+        <span style="font-family:var(--font-pixel);font-size:.38rem;color:var(--muted)">{{ c.source }}</span>
+        <a href="{{ c.url }}" class="btn btn-sm btn-orange" target="_blank" rel="noopener">▶ PLAY</a>
+      </div>
+    </article>
+    {% endfor %}
+  </div>
+</div>
+
+
+<!-- ══ LEARN TECH ════════════════════════════════════════════════════════════ -->
+<div class="section">
+  <div class="reveal"><p class="eyebrow">BONUS STAGES</p><h2>BEYOND THE <span class="txt-blue">COURSE</span></h2></div>
+  <div class="lt-grid stagger" style="margin-top:2rem">
+    <div class="lt-c card-orange">
+      <div class="lt-icon" style="background:var(--orange);border-color:var(--orange-dk)">🎬</div>
+      <h3>LEARN TECH NOW</h3>
+      <p class="text-sm mt-sm">Daily video series — real topics, zero fluff, under 20 minutes each.</p>
+      <a href="/learntech" class="btn btn-ghost btn-sm mt-md">▶ WATCH NOW</a>
+    </div>
+    <div class="lt-c card-pink">
+      <div class="lt-icon" style="background:var(--pink);border-color:var(--pink-dk)">🎙️</div>
+      <h3>THE PODCAST</h3>
+      <p class="text-sm mt-sm">Deep dives with engineers and educators. New episode every week.</p>
+      <a href="/learntech#podcast" class="btn btn-ghost btn-sm mt-md">♫ LISTEN NOW</a>
+    </div>
+    <div class="lt-c card-green">
+      <div class="lt-icon" style="background:var(--green);border-color:var(--green-dk)">✍️</div>
+      <h3>TECH TIPS BLOG</h3>
+      <p class="text-sm mt-sm">Practical articles, tool breakdowns, career advice, community posts.</p>
+      <a href="/learntech#blog" class="btn btn-ghost btn-sm mt-md">📖 READ NOW</a>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══ STACK TEASER ══════════════════════════════════════════════════════════ -->
+<div class="section">
+  <div class="stack-tease reveal">
+    <p class="eyebrow" style="justify-content:center">ITEM LIBRARY</p>
+    <h2>THE STACK — <span class="txt-blue">EVERY RESOURCE</span></h2>
+    <p class="mt-sm" style="max-width:480px;margin-left:auto;margin-right:auto">MDN, MIT OCW, freeCodeCamp, arXiv, CS50, The Odin Project — all indexed, searchable, free.</p>
+    <div style="display:flex;gap:.5rem;flex-wrap:wrap;justify-content:center;margin-top:1.5rem">
+      <span class="badge badge-blue">MDN DOCS</span>
+      <span class="badge badge-pink">ARXIV PAPERS</span>
+      <span class="badge badge-green">FREECODECAMP</span>
+      <span class="badge badge-orange">MIT OCW</span>
+      <span class="badge badge-gray">CS50</span>
+      <span class="badge badge-gray">ODIN PROJECT</span>
+    </div>
+
+    <!-- XP bar teaser -->
+    <div style="max-width:360px;margin:1.75rem auto 0">
+      <div class="xp-label"><span>KNOWLEDGE BAR</span><span class="txt-green">KEEP READING</span></div>
+      <div class="xp-wrap"><div class="xp-bar" data-xp="45" style="width:45%"></div></div>
+    </div>
+
+    <a href="/stack" class="btn btn-blue btn-lg mt-lg">ENTER THE STACK →</a>
+  </div>
+</div>
+
+
+<!-- ══ PREMIUM BAND ══════════════════════════════════════════════════════════ -->
+<div class="section">
+  <div class="prem-band reveal">
+    <!-- Pixel coin decorations -->
+    <div style="position:absolute;top:1.5rem;left:2rem;font-size:1.8rem;opacity:.2;animation:float-up 3s ease-in-out infinite" aria-hidden="true">🪙</div>
+    <div style="position:absolute;top:2rem;right:3rem;font-size:2rem;opacity:.2;animation:float-up 3s ease-in-out infinite;animation-delay:-.8s" aria-hidden="true">⭐</div>
+    <div style="position:absolute;bottom:1.5rem;left:4rem;font-size:1.5rem;opacity:.15;animation:float-up 4s ease-in-out infinite;animation-delay:-1.5s" aria-hidden="true">💎</div>
+
+    <p class="eyebrow" style="justify-content:center;color:var(--gold)">PREMIUM POWER-UP</p>
+    <h2 style="color:#fff">GO PREMIUM.<br>UNLOCK EVERYTHING.</h2>
+    <p class="mt-sm" style="max-width:420px;margin-left:auto;margin-right:auto;color:rgba(255,255,255,.65)">Ad-free video player, full course library, exclusive weekly drops — from $8/month.</p>
+
+    <!-- Perk badges -->
+    <div style="display:flex;gap:.65rem;flex-wrap:wrap;justify-content:center;margin-top:1.75rem">
+      <span class="badge badge-gold">🎯 AD-FREE</span>
+      <span class="badge badge-gold">📚 FULL LIBRARY</span>
+      <span class="badge badge-gold">⚡ WEEKLY DROPS</span>
+      <span class="badge badge-gold">🏆 PRIORITY SUPPORT</span>
+    </div>
+
+    <div style="display:flex;gap:1rem;justify-content:center;flex-wrap:wrap;margin-top:2rem">
+      <a href="/premium" class="btn btn-orange btn-xl">⭐ START FREE TRIAL</a>
+      <a href="/premium#features" class="btn btn-ghost btn-xl" style="border-color:rgba(255,255,255,.3);color:rgba(255,255,255,.75)">SEE PERKS</a>
+    </div>
+    <p style="font-family:var(--font-pixel);font-size:.4rem;color:rgba(255,255,255,.35);margin-top:1.25rem;letter-spacing:.08em">30-DAY FREE TRIAL · CANCEL ANYTIME · NO CARD REQUIRED</p>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+  fetch('/api/stats').then(r=>r.json()).then(d=>{
+    const sc=document.getElementById('s-courses');const sa=document.getElementById('s-articles');
+    if(sc){sc.dataset.count=d.courses;sc.textContent=d.courses;}
+    if(sa){sa.dataset.count=d.articles;sa.textContent=d.articles;}
+  }).catch(()=>{});
+</script>
+{% endblock %}

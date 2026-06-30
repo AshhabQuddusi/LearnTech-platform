@@ -1,0 +1,236 @@
+{% extends "base.html" %}
+{% block title %}The Stack — LearnTech{% endblock %}
+{% block head %}
+<style>
+/* Hero */
+.stack-hero{
+  background:var(--dark);padding:4rem clamp(1rem,5vw,4rem) 3rem;
+  text-align:center;position:relative;overflow:hidden;
+  border-bottom:3px solid var(--dark);
+}
+.stack-hero h1,.stack-hero .eyebrow{color:#fff}
+.stack-hero p{color:rgba(255,255,255,.6)}
+
+/* Pixel art "bookshelf" decoration */
+.bookshelf{
+  position:absolute;bottom:0;left:0;right:0;height:8px;
+  background:repeating-linear-gradient(
+    90deg,
+    var(--blue) 0,var(--blue) 22px,
+    var(--blue-dk) 22px,var(--blue-dk) 24px,
+    var(--pink) 24px,var(--pink) 46px,
+    var(--pink-dk) 46px,var(--pink-dk) 48px,
+    var(--orange) 48px,var(--orange) 70px,
+    var(--orange-dk) 70px,var(--orange-dk) 72px,
+    var(--green) 72px,var(--green) 94px,
+    var(--green-dk) 94px,var(--green-dk) 96px
+  );
+}
+
+/* Search */
+.stack-search{max-width:600px;margin:2rem auto 0}
+.stack-search .input{
+  font-size:.85rem;padding:.9rem 1rem .9rem 2.8rem;
+  border:2px solid rgba(255,255,255,.3);background:rgba(255,255,255,.08);
+  color:#fff;border-radius:var(--r-lg);box-shadow:3px 3px 0 rgba(0,0,0,.4);
+}
+.stack-search .input:focus{border-color:var(--orange);box-shadow:3px 3px 0 var(--orange-dk);background:rgba(255,255,255,.12)}
+.stack-search .input::placeholder{color:rgba(255,255,255,.35);font-family:var(--font-pixel);font-size:.48rem;letter-spacing:.05em}
+.stack-search .search-icon{color:rgba(255,255,255,.4)}
+.result-info{font-family:var(--font-pixel);font-size:.42rem;color:rgba(255,255,255,.4);margin-top:.75rem;letter-spacing:.06em;min-height:1.2em}
+
+/* Source badges strip */
+.source-strip{display:flex;justify-content:center;flex-wrap:wrap;gap:.5rem;margin-top:1.5rem}
+
+/* Body layout */
+.stack-body{
+  max-width:1280px;margin:0 auto;
+  padding:2.5rem clamp(1rem,5vw,4rem) 5rem;
+  display:grid;grid-template-columns:200px 1fr;gap:2.5rem;align-items:start;
+}
+@media(max-width:768px){.stack-body{grid-template-columns:1fr}}
+
+/* Sidebar */
+.stack-sidebar{position:sticky;top:calc(var(--nav-h) + 1.5rem)}
+@media(max-width:768px){.stack-sidebar{display:flex;flex-wrap:wrap;gap:.4rem}}
+
+.sidebar-title{font-family:var(--font-pixel);font-size:.45rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:.75rem}
+
+.sidebar-btn{
+  display:flex;align-items:center;justify-content:space-between;
+  width:100%;padding:.55rem .8rem;border-radius:var(--r-sm);
+  font-family:var(--font-pixel);font-size:.42rem;letter-spacing:.04em;
+  color:var(--dark);background:var(--ivory);
+  border:2px solid var(--border-lt);
+  cursor:pointer;margin-bottom:.35rem;
+  transition:all var(--t-fast);text-align:left;
+}
+.sidebar-btn:hover{border-color:var(--blue);color:var(--blue);background:#ecf0ff}
+.sidebar-btn.on{background:var(--blue);border-color:var(--blue-dk);color:#fff;box-shadow:2px 2px 0 var(--blue-dk)}
+.sidebar-btn.on .sb-count{background:rgba(255,255,255,.2);color:#fff}
+.sb-count{font-family:var(--font-pixel);font-size:.38rem;background:var(--border-lt);padding:.08rem .38rem;border-radius:2px;color:var(--muted)}
+
+/* Stack cards */
+.stack-card h3{font-size:1rem;line-height:1.35}
+
+/* Category icon map */
+.cat-icon{font-size:1.4rem;margin-bottom:.6rem;display:block}
+
+/* Empty state */
+.empty-box{text-align:center;padding:4rem 1rem;color:var(--muted);grid-column:1/-1}
+.empty-box .big{font-size:2.5rem;display:block;margin-bottom:.75rem}
+.empty-box h3{font-family:var(--font-pixel);font-size:.65rem;margin-bottom:.4rem}
+</style>
+{% endblock %}
+
+{% block content %}
+
+<!-- Hero -->
+<section class="stack-hero" aria-label="The Stack">
+  <div class="bookshelf" aria-hidden="true"></div>
+  <p class="eyebrow" style="justify-content:center">ITEM LIBRARY</p>
+  <h1 style="color:#fff">TECH <span style="color:var(--orange)">STACK</span></h1>
+  <p>Every doc, paper, guide and article — all searchable. All free to read.</p>
+
+  <div class="stack-search" role="search">
+    <div class="search-wrap">
+      <i class="ti ti-search search-icon" aria-hidden="true"></i>
+      <input id="stack-search" class="input" type="search"
+        placeholder="SEARCH DOCS, PAPERS, GUIDES..."
+        autocomplete="off" aria-label="Search The Stack">
+    </div>
+    <p class="result-info" id="result-info" aria-live="polite"></p>
+  </div>
+
+  <div class="source-strip" aria-label="Content sources">
+    <span class="badge badge-blue">MDN DOCS</span>
+    <span class="badge badge-pink">ARXIV</span>
+    <span class="badge badge-green">MIT OCW</span>
+    <span class="badge badge-orange">FREECODECAMP</span>
+    <span class="badge badge-dark">CS50</span>
+    <span class="badge badge-gray">ODIN PROJECT</span>
+    <span class="badge badge-gray">PYTHON DOCS</span>
+  </div>
+</section>
+
+<!-- Body -->
+<div class="stack-body">
+
+  <!-- Sidebar filters -->
+  <aside class="stack-sidebar" aria-label="Filter by category">
+    <div class="sidebar-title">FILTER BY TYPE</div>
+    <button class="sidebar-btn on" data-cat="">ALL ITEMS <span class="sb-count" id="cnt-all">—</span></button>
+    <button class="sidebar-btn" data-cat="docs">📄 DOCS <span class="sb-count" id="cnt-docs">—</span></button>
+    <button class="sidebar-btn" data-cat="article">📝 ARTICLES <span class="sb-count" id="cnt-article">—</span></button>
+    <button class="sidebar-btn" data-cat="guide">🗺 GUIDES <span class="sb-count" id="cnt-guide">—</span></button>
+    <button class="sidebar-btn" data-cat="course">🎓 COURSES <span class="sb-count" id="cnt-course">—</span></button>
+    <button class="sidebar-btn" data-cat="paper">🔬 PAPERS <span class="sb-count" id="cnt-paper">—</span></button>
+    <button class="sidebar-btn" data-cat="book">📚 BOOKS <span class="sb-count" id="cnt-book">—</span></button>
+
+    <!-- XP bar in sidebar -->
+    <div style="margin-top:1.5rem;padding:1rem;background:var(--ivory);border:2px solid var(--dark);border-radius:var(--r-md);box-shadow:var(--px-shadow-sm)">
+      <div class="xp-label" style="font-size:.4rem"><span>READING XP</span><span class="txt-green">750</span></div>
+      <div class="xp-wrap"><div class="xp-bar" data-xp="55" style="width:55%"></div></div>
+      <div style="font-family:var(--font-pixel);font-size:.38rem;color:var(--muted);margin-top:.6rem;line-height:1.8">
+        ✓ READ 4 ARTICLES<br>
+        ✓ EXPLORED DOCS<br>
+        ○ READ A PAPER
+      </div>
+    </div>
+  </aside>
+
+  <!-- Article grid -->
+  <div id="stack-grid" class="grid-2" aria-live="polite" aria-label="Reading material"></div>
+
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+let allItems=[], activeCat='', searchTerm='';
+
+const CAT_COLOR={docs:'blue',article:'orange',guide:'green',course:'pink',paper:'pink',book:'blue'};
+const CAT_ICON={docs:'📄',article:'📝',guide:'🗺',course:'🎓',paper:'🔬',book:'📚'};
+const XP_PER_TYPE={docs:30,article:20,guide:25,course:50,paper:40,book:35};
+
+async function fetchAll(){
+  const grid=document.getElementById('stack-grid');
+  grid.innerHTML='<div class="empty-box"><span class="big">⏳</span><p style="font-family:var(--font-pixel);font-size:.45rem;letter-spacing:.06em">LOADING ITEMS...</p></div>';
+  try{
+    allItems=await fetch('/api/stack').then(r=>r.json());
+    updateCounts(allItems);
+    render();
+  }catch{
+    grid.innerHTML='<div class="empty-box"><span class="big">📡</span><h3>CONNECTION LOST</h3><p>Check your connection and try again.</p></div>';
+  }
+}
+
+function updateCounts(items){
+  const count=cat=>items.filter(i=>i.category===cat).length;
+  ['docs','article','guide','course','paper','book'].forEach(c=>{
+    const el=document.getElementById(`cnt-${c}`);if(el)el.textContent=count(c);
+  });
+  const all=document.getElementById('cnt-all');if(all)all.textContent=items.length;
+}
+
+function renderCard(a){
+  const col=CAT_COLOR[a.category]||'blue';
+  const icon=CAT_ICON[a.category]||'📄';
+  const xp=XP_PER_TYPE[a.category]||20;
+  const tags=(Array.isArray(a.tags)?a.tags:[]).filter(Boolean).slice(0,3)
+    .map(t=>`<span class="badge badge-gray" style="font-size:.38rem">${t.trim()}</span>`).join('');
+  return `<article class="card reveal">
+    <div class="flex-between">
+      <div style="display:flex;align-items:center;gap:.5rem">
+        <span style="font-size:1.1rem">${icon}</span>
+        <span class="badge badge-${col}">${a.category||'article'}</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:.4rem">
+        ${a.premium?'<span class="badge badge-gold">★ PREM</span>':''}
+        <span style="font-family:var(--font-pixel);font-size:.38rem;background:var(--green);color:#fff;padding:.1rem .38rem;border-radius:2px;border:1px solid var(--green-dk)">+${xp}XP</span>
+      </div>
+    </div>
+    <h3 class="mt-sm">${a.title}</h3>
+    <p class="text-sm mt-sm">${a.summary||''}</p>
+    <div class="flex gap-sm mt-sm" style="flex-wrap:wrap">${tags}</div>
+    <div class="flex-between mt-md">
+      <span style="font-family:var(--font-pixel);font-size:.38rem;color:var(--muted)">${a.source||''}</span>
+      <a href="${a.url||'#'}" class="btn btn-sm btn-blue" ${a.url&&a.url!=='#'?'target="_blank" rel="noopener"':''}>READ →</a>
+    </div>
+  </article>`;
+}
+
+function render(){
+  const grid=document.getElementById('stack-grid');
+  const info=document.getElementById('result-info');
+  const q=searchTerm.toLowerCase();
+  let filtered=allItems.filter(item=>{
+    const catOk=!activeCat||item.category===activeCat;
+    const txt=`${item.title} ${item.summary} ${(item.tags||[]).join(' ')} ${item.source}`.toLowerCase();
+    return catOk&&(!q||txt.includes(q));
+  });
+  if(!filtered.length){
+    grid.innerHTML=`<div class="empty-box"><span class="big">👾</span><h3>NO ITEMS FOUND</h3><p>Try clearing the search or switching category.</p></div>`;
+    if(info)info.textContent='0 RESULTS';return;
+  }
+  grid.innerHTML=filtered.map(renderCard).join('');
+  if(info)info.textContent=`${filtered.length} ITEM${filtered.length!==1?'S':''} FOUND`;
+  setTimeout(()=>window.LT_reveal?.(),50);
+}
+
+document.querySelectorAll('.sidebar-btn').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    document.querySelectorAll('.sidebar-btn').forEach(b=>{b.classList.remove('on');b.setAttribute('aria-pressed','false');});
+    btn.classList.add('on');btn.setAttribute('aria-pressed','true');
+    activeCat=btn.dataset.cat;render();
+  });
+});
+
+let st;
+document.getElementById('stack-search').addEventListener('input',e=>{
+  clearTimeout(st);st=setTimeout(()=>{searchTerm=e.target.value.trim();render();},220);
+});
+
+fetchAll();
+</script>
+{% endblock %}

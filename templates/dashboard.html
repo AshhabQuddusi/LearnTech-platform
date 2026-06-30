@@ -1,0 +1,349 @@
+{% extends "base.html" %}
+{% block title %}Player Dashboard — LearnTech{% endblock %}
+{% block head %}
+<style>
+.dash { max-width: 1280px; margin: 0 auto; padding: 2.5rem clamp(1rem,5vw,4rem) 5rem; }
+
+/* ── PLAYER CARD ─────────────────────────────────────────────────────────── */
+.player-card {
+  background: var(--dark); border: 3px solid var(--dark);
+  border-radius: var(--r-xl); padding: 2.5rem;
+  box-shadow: 7px 7px 0 var(--orange-dk);
+  display: grid; grid-template-columns: auto 1fr auto;
+  gap: 2rem; align-items: center; margin-bottom: 2rem;
+  position: relative; overflow: hidden;
+}
+@media(max-width:700px){ .player-card { grid-template-columns: 1fr; text-align: center; } }
+
+/* Pixel scanline on player card */
+.player-card::before {
+  content: ''; position: absolute; inset: 0; pointer-events: none;
+  background: repeating-linear-gradient(0deg,rgba(255,255,255,0) 0px,rgba(255,255,255,0) 3px,rgba(255,255,255,.02) 3px,rgba(255,255,255,.02) 4px);
+}
+
+.player-sprite {
+  width: 88px; height: 88px; border-radius: var(--r-lg);
+  background: var(--orange); border: 3px solid var(--orange-dk);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 2.6rem; box-shadow: 4px 4px 0 var(--orange-dk);
+  flex-shrink: 0; position: relative; z-index: 1;
+}
+
+.player-info { position: relative; z-index: 1; }
+.player-name { font-family: var(--font-pixel); font-size: .8rem; color: #fff; letter-spacing: .05em; margin-bottom: .3rem; }
+.player-rank { font-family: var(--font-pixel); font-size: .45rem; color: var(--gold); letter-spacing: .1em; margin-bottom: 1.1rem; }
+
+.player-xp-bar { max-width: 380px; }
+
+.player-stats { display: flex; gap: 1.5rem; flex-wrap: wrap; position: relative; z-index: 1; }
+.p-stat { text-align: center; }
+.p-stat-n { font-family: var(--font-pixel); font-size: 1.2rem; color: var(--gold); line-height: 1; }
+.p-stat-l { font-family: var(--font-pixel); font-size: .38rem; color: rgba(255,255,255,.4); margin-top: .3rem; letter-spacing: .08em; }
+
+/* ── SECTION GRID ────────────────────────────────────────────────────────── */
+.dash-grid {
+  display: grid; grid-template-columns: 2fr 1fr;
+  gap: 1.5rem; align-items: start;
+}
+@media(max-width:900px){ .dash-grid { grid-template-columns: 1fr; } }
+
+/* ── QUEST CARDS (course progress) ──────────────────────────────────────── */
+.quest-card {
+  background: var(--ivory); border: 2px solid var(--dark);
+  border-radius: var(--r-lg); padding: 1.1rem 1.25rem;
+  box-shadow: 3px 3px 0 var(--dark); margin-bottom: .75rem;
+  display: flex; align-items: center; gap: 1rem;
+  transition: transform var(--t-fast), box-shadow var(--t-fast);
+}
+.quest-card:hover { transform: translate(-1px,-1px); box-shadow: 4px 4px 0 var(--dark); }
+
+.quest-icon {
+  width: 44px; height: 44px; border-radius: var(--r-sm);
+  border: 2px solid var(--dark); display: flex; align-items: center;
+  justify-content: center; font-size: 1.3rem; flex-shrink: 0;
+  box-shadow: 2px 2px 0 var(--dark);
+}
+.quest-info { flex: 1; min-width: 0; }
+.quest-title { font-size: .88rem; font-weight: 700; color: var(--dark); line-height: 1.3; }
+.quest-src   { font-family: var(--font-pixel); font-size: .36rem; color: var(--muted); letter-spacing: .05em; margin-top: 2px; }
+.quest-meta  { display: flex; align-items: center; gap: .5rem; margin-top: .5rem; }
+
+.quest-bar { height: 6px; background: var(--border-lt); border: 1px solid var(--dark); border-radius: 2px; flex: 1; overflow: hidden; }
+.quest-fill { height: 100%; border-radius: 1px; transition: width 1s var(--ease); }
+
+.quest-xp {
+  font-family: var(--font-pixel); font-size: .36rem;
+  background: var(--green); color: #fff;
+  padding: .1rem .38rem; border-radius: 2px;
+  border: 1px solid var(--green-dk); flex-shrink: 0;
+}
+
+/* ── ACHIEVEMENT PANEL ───────────────────────────────────────────────────── */
+.ach-panel {
+  background: var(--ivory); border: 2px solid var(--dark);
+  border-radius: var(--r-xl); padding: 1.5rem;
+  box-shadow: 5px 5px 0 var(--dark);
+}
+.ach-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: .6rem; margin-top: 1rem; }
+.ach-item {
+  background: var(--cream); border: 2px solid var(--border-lt);
+  border-radius: var(--r-md); padding: .75rem .5rem;
+  text-align: center; cursor: default;
+  transition: border-color var(--t-fast), box-shadow var(--t-fast);
+}
+.ach-item.unlocked { border-color: var(--gold-dk); box-shadow: 2px 2px 0 var(--gold-dk); background: #fffbe6; }
+.ach-item.locked   { opacity: .4; filter: grayscale(1); }
+.ach-emoji  { font-size: 1.4rem; display: block; margin-bottom: .3rem; }
+.ach-name   { font-family: var(--font-pixel); font-size: .34rem; color: var(--dark); letter-spacing: .04em; line-height: 1.5; }
+.ach-xp     { font-family: var(--font-pixel); font-size: .32rem; color: var(--green); margin-top: 2px; }
+
+/* ── ACTIVITY FEED ───────────────────────────────────────────────────────── */
+.feed-panel {
+  background: var(--ivory); border: 2px solid var(--dark);
+  border-radius: var(--r-xl); padding: 1.5rem;
+  box-shadow: 5px 5px 0 var(--dark); margin-top: 1.5rem;
+}
+.feed-item {
+  display: flex; align-items: center; gap: .85rem;
+  padding: .65rem 0; border-bottom: 2px solid var(--border-lt);
+}
+.feed-item:last-child { border-bottom: none; }
+.feed-dot { width: 10px; height: 10px; border-radius: 1px; flex-shrink: 0; }
+.feed-txt  { flex: 1; font-size: .82rem; color: var(--dark); line-height: 1.4; }
+.feed-time { font-family: var(--font-pixel); font-size: .36rem; color: var(--muted); letter-spacing: .04em; flex-shrink: 0; }
+
+/* ── LEADERBOARD ─────────────────────────────────────────────────────────── */
+.lb-panel {
+  background: var(--ivory); border: 2px solid var(--dark);
+  border-radius: var(--r-xl); padding: 1.5rem;
+  box-shadow: 5px 5px 0 var(--dark);
+}
+.lb-row {
+  display: flex; align-items: center; gap: .85rem;
+  padding: .65rem .75rem; border-radius: var(--r-sm);
+  margin-bottom: .3rem;
+  transition: background var(--t-fast);
+}
+.lb-row:hover { background: var(--cream); }
+.lb-row.me { background: #fffbe6; border: 2px solid var(--gold-dk); box-shadow: 2px 2px 0 var(--gold-dk); }
+.lb-pos   { font-family: var(--font-pixel); font-size: .5rem; color: var(--muted); width: 24px; text-align: center; flex-shrink: 0; }
+.lb-pos.gold   { color: var(--gold); }
+.lb-pos.silver { color: #9ca3af; }
+.lb-pos.bronze { color: #b45309; }
+.lb-av  { width: 30px; height: 30px; border-radius: var(--r-sm); border: 2px solid var(--dark); display: flex; align-items: center; justify-content: center; font-size: 1rem; flex-shrink: 0; box-shadow: 2px 2px 0 var(--dark); }
+.lb-info { flex: 1; }
+.lb-name { font-size: .85rem; font-weight: 700; color: var(--dark); }
+.lb-level { font-family: var(--font-pixel); font-size: .36rem; color: var(--muted); letter-spacing: .04em; }
+.lb-xp   { font-family: var(--font-pixel); font-size: .46rem; color: var(--gold); letter-spacing: .04em; }
+
+/* ── DAILY QUESTS ─────────────────────────────────────────────────────────── */
+.dq-panel {
+  background: var(--ivory); border: 2px solid var(--dark);
+  border-radius: var(--r-xl); padding: 1.5rem;
+  box-shadow: 5px 5px 0 var(--dark); margin-bottom: 1.5rem;
+}
+.dq-item {
+  display: flex; align-items: center; gap: 1rem;
+  padding: .7rem .5rem; border-bottom: 2px solid var(--border-lt);
+}
+.dq-item:last-child { border-bottom: none; }
+.dq-check {
+  width: 22px; height: 22px; border-radius: var(--r-xs);
+  border: 2px solid var(--dark); background: var(--cream);
+  display: flex; align-items: center; justify-content: center;
+  font-size: .75rem; flex-shrink: 0; box-shadow: 2px 2px 0 var(--dark);
+}
+.dq-check.done { background: var(--green); border-color: var(--green-dk); box-shadow: 2px 2px 0 var(--green-dk); color: #fff; }
+.dq-txt  { flex: 1; font-size: .85rem; color: var(--dark); line-height: 1.3; }
+.dq-xp   { font-family: var(--font-pixel); font-size: .36rem; background: var(--orange); color: #fff; padding: .1rem .38rem; border-radius: 2px; border: 1px solid var(--orange-dk); }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="dash">
+
+  <!-- Player card -->
+  <div class="player-card reveal">
+    <div class="player-sprite" id="dash-sprite">🎮</div>
+    <div class="player-info">
+      <div class="player-name" id="dash-name">PLAYER ONE</div>
+      <div class="player-rank">★ RANK: APPRENTICE CODER · LVL.4</div>
+      <div class="player-xp-bar">
+        <div class="xp-label" style="color:rgba(255,255,255,.55)">
+          <span>1,250 XP</span><span class="txt-green">250 TO LEVEL 5</span>
+        </div>
+        <div class="xp-wrap">
+          <div class="xp-bar" data-xp="62" style="width:62%"></div>
+        </div>
+      </div>
+    </div>
+    <div class="player-stats">
+      <div class="p-stat"><div class="p-stat-n">4</div><div class="p-stat-l">COURSES</div></div>
+      <div class="p-stat"><div class="p-stat-n">12</div><div class="p-stat-l">ARTICLES</div></div>
+      <div class="p-stat"><div class="p-stat-n">8</div><div class="p-stat-l">BADGES</div></div>
+      <div class="p-stat"><div class="p-stat-n">#42</div><div class="p-stat-l">RANK</div></div>
+    </div>
+  </div>
+
+  <div class="dash-grid">
+
+    <!-- LEFT COLUMN -->
+    <div>
+
+      <!-- Daily quests -->
+      <div class="dq-panel reveal">
+        <p class="eyebrow" style="margin-bottom:.75rem">📅 DAILY QUESTS</p>
+        {% for dq in [
+          (True,  "Watch one Learn Tech video",       "+25XP"),
+          (True,  "Read one article in The Stack",    "+20XP"),
+          (False, "Complete one course section",       "+50XP"),
+          (False, "Share a resource with the community","+15XP"),
+        ] %}
+        <div class="dq-item">
+          <div class="dq-check {% if dq[0] %}done{% endif %}" aria-label="{% if dq[0] %}Completed{% else %}Not completed{% endif %}">
+            {% if dq[0] %}✓{% endif %}
+          </div>
+          <div class="dq-txt" style="{% if dq[0] %}text-decoration:line-through;color:var(--muted){% endif %}">{{ dq[1] }}</div>
+          <span class="dq-xp">{{ dq[2] }}</span>
+        </div>
+        {% endfor %}
+        <div style="margin-top:1rem">
+          <div class="xp-label"><span>DAILY PROGRESS</span><span class="txt-green">2/4 DONE</span></div>
+          <div class="xp-wrap"><div class="xp-bar" data-xp="50" style="width:50%;background:var(--orange)"></div></div>
+        </div>
+      </div>
+
+      <!-- Active courses -->
+      <div class="reveal">
+        <p class="eyebrow" style="margin-bottom:1rem">⚔️ ACTIVE QUESTS</p>
+        {% set active = [
+          ("🌐","#4D73D9,#7B9AE8","Responsive Web Design","freeCodeCamp",72,"#76B947","+150XP"),
+          ("🐍","#76B947,#9ED46A","Python for Everybody","U. Michigan",38,"#E97B3C","+200XP"),
+          ("⚙️","#E97B3C,#F0A070","Back End Dev & APIs","freeCodeCamp",15,"#E66AA8","+250XP"),
+          ("📊","#E66AA8,#F09AC8","Data Analysis with Python","freeCodeCamp",5,"#4D73D9","+200XP"),
+        ] %}
+        {% for c in active %}
+        <div class="quest-card">
+          <div class="quest-icon" style="background:linear-gradient(145deg,{{c[1]}})">{{ c[0] }}</div>
+          <div class="quest-info">
+            <div class="quest-title">{{ c[2] }}</div>
+            <div class="quest-src">{{ c[3] }}</div>
+            <div class="quest-meta">
+              <div class="quest-bar"><div class="quest-fill" style="width:{{c[4]}}%;background:{{c[5]}}"></div></div>
+              <span style="font-family:var(--font-pixel);font-size:.36rem;color:var(--muted);flex-shrink:0">{{c[4]}}%</span>
+            </div>
+          </div>
+          <span class="quest-xp">{{ c[6] }}</span>
+        </div>
+        {% endfor %}
+        <a href="/courses" class="btn btn-ghost btn-sm" style="margin-top:.5rem">+ ADD NEW COURSE</a>
+      </div>
+
+      <!-- Activity feed -->
+      <div class="feed-panel reveal" style="margin-top:1.5rem">
+        <p class="eyebrow" style="margin-bottom:.75rem">⚡ RECENT ACTIVITY</p>
+        {% for f in [
+          ("var(--green)","Completed CSS Grid section in Responsive Web Design","2 HOURS AGO"),
+          ("var(--blue)","Read 'MDN Web Docs — CSS Reference' in The Stack","3 HOURS AGO"),
+          ("var(--orange)","Watched 'JavaScript Async/Await Explained'","YESTERDAY"),
+          ("var(--gold)","Earned badge: BOOKWORM (5 articles read)","YESTERDAY"),
+          ("var(--pink)","Started 'Python for Everybody' — +50 XP","2 DAYS AGO"),
+        ] %}
+        <div class="feed-item">
+          <div class="feed-dot" style="background:{{f[0]}}"></div>
+          <div class="feed-txt">{{ f[1] }}</div>
+          <div class="feed-time">{{ f[2] }}</div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+
+    <!-- RIGHT COLUMN -->
+    <div>
+
+      <!-- Leaderboard -->
+      <div class="lb-panel reveal">
+        <p class="eyebrow" style="margin-bottom:1rem">🏆 LEADERBOARD</p>
+        {% set leaders = [
+          ("🥇","gold","ZeroToHero_Dev","LVL.12","8,420XP","#4D73D9"),
+          ("🥈","silver","PyMasterXX","LVL.10","7,180XP","#76B947"),
+          ("🥉","bronze","CSSWizard99","LVL.9","6,550XP","#E66AA8"),
+          ("4","","ReactRookie","LVL.8","5,290XP","#E97B3C"),
+          ("5","","DataDriven_J","LVL.7","4,870XP","#F5C518"),
+        ] %}
+        {% for l in leaders %}
+        <div class="lb-row">
+          <div class="lb-pos {{l[1]}}">{{ l[0] }}</div>
+          <div class="lb-av" style="background:{{l[5]}}">{{ l[2][0] }}</div>
+          <div class="lb-info">
+            <div class="lb-name">{{ l[2] }}</div>
+            <div class="lb-level">{{ l[3] }}</div>
+          </div>
+          <div class="lb-xp">{{ l[4] }}</div>
+        </div>
+        {% endfor %}
+        <!-- You (current user) -->
+        <div class="lb-row me">
+          <div class="lb-pos" style="color:var(--orange)">#42</div>
+          <div class="lb-av" style="background:var(--orange)" id="lb-av">P</div>
+          <div class="lb-info">
+            <div class="lb-name" id="lb-name">YOU</div>
+            <div class="lb-level">LVL.4</div>
+          </div>
+          <div class="lb-xp">1,250XP</div>
+        </div>
+        <a href="#" class="btn btn-ghost btn-sm" style="width:100%;justify-content:center;margin-top:.75rem">VIEW FULL RANKINGS</a>
+      </div>
+
+      <!-- Achievements -->
+      <div class="ach-panel reveal" style="margin-top:1.5rem">
+        <p class="eyebrow" style="margin-bottom:.25rem">🏅 ACHIEVEMENTS</p>
+        <div style="font-family:var(--font-pixel);font-size:.38rem;color:var(--muted);letter-spacing:.05em;margin-bottom:.5rem">8 / 24 UNLOCKED</div>
+        <div class="xp-wrap" style="margin-bottom:.75rem"><div class="xp-bar" data-xp="33" style="width:33%;background:var(--gold)"></div></div>
+        <div class="ach-grid">
+          {% for a in [
+            ("🏆","FIRST STEP","+10XP",True),
+            ("📚","BOOKWORM","+25XP",True),
+            ("⚡","SPEED RUN","+50XP",True),
+            ("🌐","WEB WARRIOR","+30XP",True),
+            ("🐍","SNAKE CHARMER","+30XP",False),
+            ("🎯","SHARP SHOOTER","+40XP",False),
+            ("💎","PREMIUM PLAYER","+100XP",False),
+            ("🔬","PAPER READER","+35XP",True),
+            ("🎓","GRADUATE","+150XP",False),
+          ] %}
+          <div class="ach-item {% if a[3] %}unlocked{% else %}locked{% endif %}" title="{{ a[1] }}">
+            <span class="ach-emoji">{{ a[0] }}</span>
+            <div class="ach-name">{{ a[1] }}</div>
+            <div class="ach-xp">{{ a[2] }}</div>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  // Restore player name from session
+  const raw = sessionStorage.getItem('lt_user');
+  if (raw) {
+    const u = JSON.parse(raw);
+    const name = u.name.toUpperCase();
+    const dn = document.getElementById('dash-name');
+    const ln = document.getElementById('lb-name');
+    const la = document.getElementById('lb-av');
+    const sp = document.getElementById('dash-sprite');
+    if (dn) dn.textContent = name;
+    if (ln) ln.textContent = name.split(' ')[0];
+    if (la) la.textContent = name.charAt(0);
+    if (sp && u.premium) sp.textContent = '👑';
+  } else {
+    // Not logged in — redirect
+    window.location.href = '/login';
+  }
+</script>
+{% endblock %}

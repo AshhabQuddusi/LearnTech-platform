@@ -1,0 +1,127 @@
+{% extends "base.html" %}
+{% block title %}404 — Stage Not Found{% endblock %}
+{% block head %}
+<style>
+.error-page {
+  min-height: calc(100vh - var(--nav-h));
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  text-align: center; padding: 3rem 1rem;
+  position: relative; overflow: hidden;
+}
+
+/* Pixel grid */
+.error-page::before {
+  content: ''; position: absolute; inset: 0; pointer-events: none;
+  background-image: linear-gradient(rgba(77,115,217,.06) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(77,115,217,.06) 1px,transparent 1px);
+  background-size: 48px 48px;
+}
+
+/* Giant 404 */
+.err-404 {
+  font-family: var(--font-pixel);
+  font-size: clamp(4rem, 18vw, 9rem);
+  color: var(--dark); line-height: 1;
+  position: relative; z-index: 1;
+  text-shadow: 6px 6px 0 var(--orange);
+  letter-spacing: .05em;
+}
+
+/* Game over text */
+.game-over {
+  font-family: var(--font-pixel); font-size: clamp(.7rem,3vw,1.2rem);
+  color: var(--red); letter-spacing: .1em;
+  margin: .75rem 0 1.75rem; position: relative; z-index: 1;
+  animation: blink 1.2s step-end infinite;
+}
+
+.err-sub {
+  font-size: 1rem; color: var(--muted); max-width: 360px;
+  position: relative; z-index: 1; margin-bottom: 2rem;
+}
+
+/* Continue countdown */
+.continue-box {
+  background: var(--dark); border: 3px solid var(--dark);
+  border-radius: var(--r-xl); padding: 1.5rem 2.5rem;
+  box-shadow: 6px 6px 0 var(--orange-dk);
+  position: relative; z-index: 1; margin-bottom: 2.5rem;
+}
+.continue-text {
+  font-family: var(--font-pixel); font-size: .6rem;
+  color: var(--gold); letter-spacing: .1em;
+  animation: blink 1.5s step-end infinite;
+  margin-bottom: .75rem; display: block;
+}
+.countdown-n {
+  font-family: var(--font-pixel); font-size: 3rem;
+  color: var(--orange); line-height: 1;
+  text-shadow: 3px 3px 0 var(--orange-dk);
+}
+
+/* Pixel art ghost / sad character */
+.sad-char {
+  font-size: 5rem; margin-bottom: 1rem;
+  position: relative; z-index: 1;
+  animation: float-up 3s ease-in-out infinite;
+}
+
+/* Ground platform */
+.ground {
+  position: absolute; bottom: 0; left: 0; right: 0; height: 16px;
+  background: repeating-linear-gradient(90deg,
+    var(--orange) 0,var(--orange) 30px,
+    var(--orange-dk) 30px,var(--orange-dk) 32px);
+  border-top: 3px solid var(--orange-dk);
+  z-index: 0;
+}
+.ground-row-2 {
+  position: absolute; bottom: 16px; left: 0; right: 0; height: 8px;
+  background: var(--dark);
+}
+
+.err-links { display: flex; gap: .75rem; flex-wrap: wrap; justify-content: center; position: relative; z-index: 1; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="error-page">
+  <div class="sad-char" aria-hidden="true">👾</div>
+  <div class="err-404" aria-label="Error 404">404</div>
+  <div class="game-over">STAGE NOT FOUND</div>
+  <p class="err-sub">The page you're looking for doesn't exist, was moved, or you took a wrong turn at the last pipe.</p>
+
+  <!-- Continue? countdown -->
+  <div class="continue-box" aria-live="polite">
+    <span class="continue-text">CONTINUE?</span>
+    <div class="countdown-n" id="countdown">9</div>
+  </div>
+
+  <div class="err-links">
+    <a href="/" class="btn btn-orange btn-lg">▶ GO HOME</a>
+    <a href="/courses" class="btn btn-blue btn-lg">COURSES</a>
+    <a href="/stack" class="btn btn-ghost btn-lg">THE STACK</a>
+  </div>
+
+  <!-- Ground decoration -->
+  <div class="ground-row-2" aria-hidden="true"></div>
+  <div class="ground" aria-hidden="true"></div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  // Countdown from 9 to 0 then go home
+  let n = 9;
+  const el = document.getElementById('countdown');
+  const iv = setInterval(() => {
+    n--;
+    if (el) el.textContent = n;
+    if (n <= 0) { clearInterval(iv); window.location.href = '/'; }
+  }, 1000);
+
+  // Cancel on any click
+  document.addEventListener('click', () => clearInterval(iv));
+</script>
+{% endblock %}
